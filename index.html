@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>random</title>
+    <style>
+        :root {
+            --bg: #f5f6f8;
+            --card: #fff;
+            --text: #1a1d21;
+            --muted: #6b7280;
+            --border: #e3e6ea;
+            --accent: #3a5aac;
+            --accent-bright: #5b86e5;
+            --pulse: #a855f7;
+            --field: color-mix(in srgb, var(--card) 55%, var(--bg));
+            --field-hover: color-mix(in srgb, var(--card) 35%, var(--bg));
+            --accent-hover: color-mix(in srgb, var(--accent) 85%, #000);
+            --pulse-ring: color-mix(in srgb, var(--pulse) 55%, transparent);
+            --track: color-mix(in srgb, var(--muted) 40%, var(--field));
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f1115;
+                --card: #1a1d23;
+                --text: #e6e8eb;
+                --muted: #9ba1a9;
+                --border: #2a2e35;
+            }
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 650;
+            letter-spacing: .02em;
+        }
+
+        header .tagline {
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .card {
+            width: 460px;
+            max-width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+        }
+
+        .tab {
+            flex: 1;
+            width: auto;
+            margin: 0;
+            background: var(--field);
+            color: var(--muted);
+            border: none;
+            border-radius: 0;
+            border-bottom: 2px solid var(--border);
+            padding: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            cursor: pointer;
+            transition: color .2s ease, background-color .2s ease, border-color .2s ease;
+        }
+
+        .tab:not(.active):hover {
+            color: var(--text);
+            background: var(--field-hover);
+        }
+
+        .tab.active {
+            background: var(--card);
+            color: var(--accent-bright);
+            border-bottom-color: var(--accent-bright);
+        }
+
+        .tab-panel {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        input[type="number"], input[type="text"] {
+            padding: 10px;
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            background: var(--field);
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            accent-color: var(--accent);
+        }
+
+        .length-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .length-control input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(to right,
+                var(--accent) var(--fill, 50%), var(--track) var(--fill, 50%));
+            cursor: pointer;
+        }
+
+        .length-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+        }
+
+        .length-control input[type="range"]::-moz-range-track {
+            height: 6px;
+            border-radius: 999px;
+            background: var(--track);
+        }
+
+        .length-control input[type="range"]::-moz-range-progress {
+            height: 6px;
+            border-radius: 999px;
+            background: var(--accent);
+        }
+
+        .length-control input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border: none;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .length-control input[type="number"] {
+            width: 72px;
+            text-align: center;
+        }
+
+        button {
+            background: transparent;
+            color: var(--text);
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+        }
+
+        button:hover {
+            background: var(--field);
+            border-color: var(--muted);
+        }
+
+        button:focus-visible {
+            outline: 2px solid var(--accent-bright);
+            outline-offset: 2px;
+        }
+
+        button.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        .button-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .button-row button {
+            width: auto;
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .group-label {
+            flex: none;
+            width: 80px;
+            text-align: right;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--muted);
+        }
+
+        .button-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .button-grid button {
+            width: auto;
+        }
+
+        /* Options drawer: one bordered box holding the header and all rows */
+        .drawer {
+            margin-top: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .drawer > summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: var(--field);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            cursor: pointer;
+            list-style: none;
+            transition: background-color .3s ease;
+        }
+
+        .drawer > summary:hover {
+            background: var(--field-hover);
+        }
+
+        .drawer > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .drawer > summary::after {
+            content: '\25B8';
+            color: var(--muted);
+            transition: transform .2s ease;
+        }
+
+        .drawer[open] > summary {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .drawer[open] > summary::after {
+            transform: rotate(90deg);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background-color .3s ease;
+        }
+
+        .checkbox-label:hover {
+            background: var(--field-hover);
+        }
+
+        .checkbox-label + .checkbox-label {
+            border-top: 1px solid var(--border);
+        }
+
+        .checkbox-label:has(input:disabled) {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        .checkbox-label > span:first-of-type {
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .info-wrap {
+            position: relative;
+            margin-left: auto;
+            flex: none;
+            display: inline-flex;
+        }
+
+        .info-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--border);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: var(--text);
+            color: var(--card);
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .1s ease;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .info-wrap:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .collapsible {
+            max-height: 0;
+            margin-top: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.35s ease,
+                        margin-top 0.35s ease, padding 0.35s ease;
+        }
+
+        .collapsible.show {
+            max-height: 500px;
+            margin-top: 20px;
+            opacity: 1;
+            overflow-y: auto;
+        }
+
+        .output-box {
+            padding: 0 12px;
+            background: var(--field);
+            border-radius: 8px;
+            font-family: var(--mono);
+            font-size: 14px;
+            color: var(--text);
+            text-align: left;
+            word-break: break-all;
+            cursor: pointer;
+        }
+
+        .output-box.show {
+            padding: 12px;
+        }
+
+        .option-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0;
+        }
+
+        .password-option {
+            background: var(--field);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: var(--mono);
+            font-size: 14px;
+            color: var(--text);
+            text-align: left;
+            word-break: break-all;
+            cursor: pointer;
+        }
+
+        /* Reserved-height notice so its fade in/out never resizes the card */
+        .toast {
+            height: 18px;
+            line-height: 18px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+            opacity: 0;
+            transition: opacity .5s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transition: opacity .1s ease;
+        }
+
+        @keyframes pulse-ring-button {
+            0%   { background: var(--pulse); box-shadow: 0 0 0 0 var(--pulse-ring); }
+            100% { background: transparent; box-shadow: 0 0 0 12px transparent; }
+        }
+
+        button.pulse {
+            animation: pulse-ring-button 0.6s ease-out;
+        }
+
+        @keyframes pulse-ring-box {
+            0%   { background: var(--pulse); box-shadow: 0 0 0 0 var(--pulse-ring); }
+            100% { background: var(--field); box-shadow: 0 0 0 12px transparent; }
+        }
+
+        .output-box.pulse, .password-option.pulse {
+            animation: pulse-ring-box 0.6s ease-out;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pulse { animation: none; }
+            .collapsible { transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>random</h1>
+        <p class="tagline">password + text generator</p>
+    </header>
+
+    <div class="card">
+        <div class="tabs">
+            <button type="button" class="tab active" data-tab="password" onclick="showTab('password')">Password</button>
+            <button type="button" class="tab" data-tab="text" onclick="showTab('text')">Text</button>
+        </div>
+
+        <section id="panel-password" class="tab-panel active">
+            <form id="password-form">
+                <label id="length-label" for="length">Password Length</label>
+                <div class="length-control">
+                    <input type="range" id="password-length-slider" min="4" max="64" value="24">
+                    <input type="number" id="length" min="4" max="64" value="24">
+                </div>
+
+                <div class="button-row">
+                    <button type="button" class="primary" onclick="generatePassword()">Choose</button>
+                    <button type="button" onclick="copyNewPassword(this)">Copy</button>
+                </div>
+
+                <details class="drawer">
+                    <summary>Options</summary>
+
+                    <label class="checkbox-label" for="passphrase">
+                        <input type="checkbox" id="passphrase" onchange="togglePassphrase()">
+                        <span>Correct Horse Battery Staple</span>
+                        <span class="info-wrap">
+                            <span class="info-button">i</span>
+                            <span class="tooltip">Passphrase of random words; length sets the word count</span>
+                        </span>
+                    </label>
+
+                    <label class="checkbox-label" for="include-upper">
+                        <input type="checkbox" id="include-upper" checked>
+                        <span>Include Uppercase Letters</span>
+                        <span class="info-wrap">
+                            <span class="info-button">i</span>
+                            <span class="tooltip">A-Z</span>
+                        </span>
+                    </label>
+
+                    <label class="checkbox-label" for="include-numbers">
+                        <input type="checkbox" id="include-numbers" checked>
+                        <span>Include Numbers</span>
+                        <span class="info-wrap">
+                            <span class="info-button">i</span>
+                            <span class="tooltip">0-9</span>
+                        </span>
+                    </label>
+
+                    <label class="checkbox-label" for="include-specials">
+                        <input type="checkbox" id="include-specials">
+                        <span>Include Special Characters</span>
+                        <span class="info-wrap">
+                            <span class="info-button">i</span>
+                            <span class="tooltip">!@#$%^&amp;*()_+~`|}{[]:;?&gt;&lt;,./-=</span>
+                        </span>
+                    </label>
+
+                    <label class="checkbox-label" for="exclude-similar">
+                        <input type="checkbox" id="exclude-similar">
+                        <span>Exclude Similar Characters</span>
+                        <span class="info-wrap">
+                            <span class="info-button">i</span>
+                            <span class="tooltip">I, l, 1, O, 0</span>
+                        </span>
+                    </label>
+
+                    <label class="checkbox-label" for="exclude-vowels">
+                        <input type="checkbox" id="exclude-vowels">
+                        <span>Exclude Vowels</span>
+                        <span class="info-wrap">
+                            <span class="info-button">i</span>
+                            <span class="tooltip">a, e, i, o, u</span>
+                        </span>
+                    </label>
+
+                    <label class="checkbox-label" for="exclude-ambiguous">
+                        <input type="checkbox" id="exclude-ambiguous">
+                        <span>Avoid Ambiguous Characters</span>
+                        <span class="info-wrap">
+                            <span class="info-button">i</span>
+                            <span class="tooltip">{ } [ ] ( ) / \ ' &quot; ~ , ; : . &lt; &gt;</span>
+                        </span>
+                    </label>
+                </details>
+            </form>
+
+            <div id="password-output" class="collapsible option-list"></div>
+        </section>
+
+        <section id="panel-text" class="tab-panel">
+            <form id="text-form">
+                <label for="text-length">Length</label>
+                <div class="length-control">
+                    <input type="range" id="text-length-slider" min="1" max="128" value="32">
+                    <input type="number" id="text-length" min="1" max="128" value="32">
+                </div>
+
+                <div class="button-group">
+                    <span class="group-label">IDs</span>
+                    <div class="button-grid">
+                        <button type="button" onclick="generateText('uuid')">UUID</button>
+                        <button type="button" onclick="generateText('ulid')">ULID</button>
+                        <button type="button" onclick="generateText('mac')">MAC</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <span class="group-label">Encodings</span>
+                    <div class="button-grid">
+                        <button type="button" onclick="generateText('base64')">Base64</button>
+                        <button type="button" onclick="generateText('bytes')">Bytes</button>
+                        <button type="button" onclick="generateText('hex')">Hex</button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="text-output" class="collapsible output-box" title="Click to copy" onclick="copyToClipboard('text-output')"></div>
+        </section>
+    </div>
+
+    <div id="password-toast" class="toast">new random password copied to clipboard</div>
+
+    <script>
+        const FORMAT_BASE64 = 'base64';
+        const FORMAT_BYTES = 'bytes';
+        const FORMAT_HEX = 'hex';
+        const FORMAT_UUID = 'uuid';
+        const FORMAT_MAC = 'mac';
+        const FORMAT_ULID = 'ulid';
+
+        const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
+        const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const DIGITS = '0123456789';
+        const SPECIALS = '!@#$%^&*()_+~`|}{[]:;?><,./-=';
+
+        const PASSWORD_OPTION_COUNT = 5;
+        const TOAST_DURATION_MS = 1500;
+        const MAC_BYTE_COUNT = 6;
+
+        let toastTimer;
+        const HEX_CHARS_PER_BYTE = 2;
+        const BASE64_BYTES_PER_CHAR = 3 / 4;
+        const BASE64_BYTE_SLACK = 3;
+
+        // Crockford base32 (no I, L, O, U); ULID is 10 timestamp + 16 random chars.
+        const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+        const ULID_TIME_CHARS = 10;
+        const ULID_RANDOM_CHARS = 16;
+
+        // Passphrase mode ("correct horse battery staple")
+        const PASSPHRASE_WORD_COUNT = 4;
+        const PASSPHRASE_OPTION_IDS = [
+            'include-upper', 'include-numbers', 'include-specials',
+            'exclude-similar', 'exclude-vowels', 'exclude-ambiguous'
+        ];
+        // Wordlist is bundled with the page and loaded on start.
+        const WORDLIST_URL = 'words.txt';
+        const WORD_PATTERN = /^[a-z]{3,9}$/;
+
+        let WORDS = [];
+        let savedOptionStates = null;
+
+        function secureRandomIndex(range) {
+            const limit = Math.floor(0x100000000 / range) * range;
+            const buffer = new Uint32Array(1);
+            let value;
+            do {
+                crypto.getRandomValues(buffer);
+                value = buffer[0];
+            } while (value >= limit);
+            return value % range;
+        }
+
+        function buildPassphrase() {
+            if (WORDS.length === 0) return '';
+            const wordCount = parseInt(document.getElementById('length').value, 10) || 1;
+            const words = [];
+            for (let i = 0; i < wordCount; i++) {
+                words.push(WORDS[secureRandomIndex(WORDS.length)]);
+            }
+            return words.join(' ');
+        }
+
+        function buildPassword() {
+            if (document.getElementById('passphrase').checked) {
+                return buildPassphrase();
+            }
+
+            const length = document.getElementById('length').value;
+            const includeUpper = document.getElementById('include-upper').checked;
+            const includeNumbers = document.getElementById('include-numbers').checked;
+            const includeSpecials = document.getElementById('include-specials').checked;
+            const excludeSimilar = document.getElementById('exclude-similar').checked;
+            const excludeVowels = document.getElementById('exclude-vowels').checked;
+            const excludeAmbiguous = document.getElementById('exclude-ambiguous').checked;
+
+            let characterSet = LOWERCASE;
+            if (includeUpper) characterSet += UPPERCASE;
+            if (includeNumbers) characterSet += DIGITS;
+            if (includeSpecials) characterSet += SPECIALS;
+
+            // Exclude similar characters
+            if (excludeSimilar) {
+                characterSet = characterSet.replace(/[Il1O0]/g, '');
+            }
+
+            // Exclude vowels
+            if (excludeVowels) {
+                characterSet = characterSet.replace(/[aeiouAEIOU]/g, '');
+            }
+
+            // Exclude ambiguous characters
+            if (excludeAmbiguous) {
+                characterSet = characterSet.replace(/[{}[\]()\/\\'"\~`,;:.<>]/g, '');
+            }
+
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * characterSet.length);
+                password += characterSet[randomIndex];
+            }
+
+            return password;
+        }
+
+        // Generate a list of password options; clicking one copies just that option.
+        function generatePassword() {
+            const output = document.getElementById('password-output');
+            output.innerHTML = '';
+
+            for (let i = 0; i < PASSWORD_OPTION_COUNT; i++) {
+                const option = document.createElement('div');
+                option.className = 'password-option';
+                option.textContent = buildPassword();
+                option.title = 'Click to copy';
+                option.addEventListener('click', () => {
+                    navigator.clipboard.writeText(option.textContent);
+                    pulse(option);
+                });
+                output.appendChild(option);
+            }
+
+            output.classList.add('show');
+        }
+
+        // Generate a fresh password straight to the clipboard, ping the button, and flash a notice.
+        function copyNewPassword(button) {
+            navigator.clipboard.writeText(buildPassword());
+            pulse(button);
+            const toast = document.getElementById('password-toast');
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), TOAST_DURATION_MS);
+        }
+
+        // Toggle passphrase mode: switch length to a word count and lock the other options.
+        function togglePassphrase() {
+            const on = document.getElementById('passphrase').checked;
+            const lengthLabel = document.getElementById('length-label');
+
+            if (on) {
+                savedOptionStates = {};
+                PASSPHRASE_OPTION_IDS.forEach(id => {
+                    const option = document.getElementById(id);
+                    savedOptionStates[id] = option.checked;
+                    option.checked = false;
+                    option.disabled = true;
+                });
+                setLength(PASSPHRASE_WORD_COUNT);
+                lengthLabel.textContent = 'Word Count';
+            } else {
+                PASSPHRASE_OPTION_IDS.forEach(id => {
+                    const option = document.getElementById(id);
+                    option.disabled = false;
+                    if (savedOptionStates) option.checked = savedOptionStates[id];
+                });
+                savedOptionStates = null;
+                lengthLabel.textContent = 'Password Length';
+            }
+        }
+
+        function setLength(value) {
+            const number = document.getElementById('length');
+            const slider = document.getElementById('password-length-slider');
+            number.value = value;
+            slider.value = value;
+            updateSliderFill(slider);
+        }
+
+        // Load the bundled wordlist; passphrase mode stays inert until it arrives.
+        async function loadWordlist() {
+            try {
+                const response = await fetch(WORDLIST_URL);
+                if (!response.ok) return;
+                const text = await response.text();
+                WORDS = text.split(/\s+/).filter(word => WORD_PATTERN.test(word));
+            } catch (error) {
+                // Bundled file missing/unreachable — passphrase mode yields empty until reload.
+            }
+        }
+
+        function randomBytes(count) {
+            const bytes = new Uint8Array(count);
+            crypto.getRandomValues(bytes);
+            return bytes;
+        }
+
+        function toHex(bytes) {
+            return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function generateUlid() {
+            const radix = ULID_ALPHABET.length;
+
+            let timestamp = Date.now();
+            let time = '';
+            for (let i = 0; i < ULID_TIME_CHARS; i++) {
+                time = ULID_ALPHABET[timestamp % radix] + time;
+                timestamp = Math.floor(timestamp / radix);
+            }
+
+            let random = '';
+            randomBytes(ULID_RANDOM_CHARS).forEach(b => random += ULID_ALPHABET[b % radix]);
+
+            return time + random;
+        }
+
+        function generateText(format) {
+            let result;
+
+            if (format === FORMAT_UUID) {
+                result = crypto.randomUUID();
+            } else if (format === FORMAT_ULID) {
+                result = generateUlid();
+            } else if (format === FORMAT_MAC) {
+                const bytes = randomBytes(MAC_BYTE_COUNT);
+                result = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(':');
+            } else {
+                const length = parseInt(document.getElementById('text-length').value, 10) || 1;
+
+                if (format === FORMAT_HEX) {
+                    const byteCount = Math.ceil(length / HEX_CHARS_PER_BYTE);
+                    result = toHex(randomBytes(byteCount)).slice(0, length);
+                } else if (format === FORMAT_BASE64) {
+                    const byteCount = Math.ceil(length * BASE64_BYTES_PER_CHAR) + BASE64_BYTE_SLACK;
+                    let binary = '';
+                    randomBytes(byteCount).forEach(b => binary += String.fromCharCode(b));
+                    result = btoa(binary)
+                        .replace(/\+/g, '-')
+                        .replace(/\//g, '_')
+                        .replace(/=+$/, '')
+                        .slice(0, length);
+                } else {
+                    result = Array.from(randomBytes(length)).join(' ');
+                }
+            }
+
+            const output = document.getElementById('text-output');
+            output.textContent = result;
+            output.classList.add('show');
+        }
+
+        function copyToClipboard(outputId) {
+            const output = document.getElementById(outputId);
+            navigator.clipboard.writeText(output.textContent);
+            pulse(output);
+        }
+
+        function pulse(element) {
+            element.classList.remove('pulse');
+            // Force reflow so the animation restarts on rapid successive clicks
+            void element.offsetWidth;
+            element.classList.add('pulse');
+            // Drop the class once done so re-displaying the panel doesn't replay it
+            element.addEventListener('animationend', () => element.classList.remove('pulse'), { once: true });
+        }
+
+        function showTab(name) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === name);
+            });
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === 'panel-' + name);
+            });
+        }
+
+        // Paint the filled (left) portion of the slider up to the current value.
+        function updateSliderFill(slider) {
+            const min = parseFloat(slider.min);
+            const max = parseFloat(slider.max);
+            const value = parseFloat(slider.value);
+            const percent = ((value - min) / (max - min)) * 100;
+            slider.style.setProperty('--fill', percent + '%');
+        }
+
+        // Keep each length slider and its number box in sync.
+        function bindLengthControl(sliderId, numberId) {
+            const slider = document.getElementById(sliderId);
+            const number = document.getElementById(numberId);
+
+            slider.addEventListener('input', () => {
+                number.value = slider.value;
+                updateSliderFill(slider);
+            });
+
+            number.addEventListener('input', () => {
+                const min = parseInt(number.min, 10);
+                const max = parseInt(number.max, 10);
+                let value = parseInt(number.value, 10);
+                if (isNaN(value)) return;
+                if (value < min) value = min;
+                if (value > max) value = max;
+                slider.value = value;
+                updateSliderFill(slider);
+            });
+
+            updateSliderFill(slider);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            bindLengthControl('password-length-slider', 'length');
+            bindLengthControl('text-length-slider', 'text-length');
+            loadWordlist();
+        });
+    </script>
+</body>
+</html>

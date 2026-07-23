@@ -1,57 +1,59 @@
-# Simple Self-Hosted Password Generator
+# random
 
-A lightweight, and self-hosted password generator that runs entirely in a single HTML file. This tool provides a modern and easy-to-use interface for generating secure passwords with various customization options, such as length, inclusion of special characters, and exclusion of ambiguous or similar characters.
+A self-hosted password and text generator that runs entirely in the browser from a single HTML file. No backend, no build step, no runtime dependencies — just `index.html` plus a bundled wordlist. Randomness for the text tools and passphrases comes from the Web Crypto API (`crypto.getRandomValues` / `crypto.randomUUID`), not `Math.random`.
 
-## Key Features
+![random](preview.png)
 
-- **Single HTML File**: No need for external dependencies or additional files. Everything is contained in a single `passgen.html` file.
-- **Customization Options**: Choose from a variety of password settings, such as including uppercase letters, numbers, and special characters, or excluding similar and ambiguous characters.
-- **Instant Password Generation**: Quickly generate strong passwords directly in your browser.
-- **Self-Hosted**: Easily host this tool on your server without any back-end requirements.
-- **Copy to Clipboard**: Copy the generated password with a single click.
+## Features
 
-## How It Works
+- **Two tabs — Password and Text** — in one card, dark/light aware (follows the OS `prefers-color-scheme`).
+- **Password tab**
+  - **Length** slider (4–64) paired with a number box.
+  - **Choose** — generates five options; click any one to copy it.
+  - **Copy** — generates a fresh password straight to the clipboard.
+  - **Options** drawer — uppercase, numbers, special characters, and exclusions for similar (`Il1O0`), vowels, and ambiguous (`{}[]()/\'"~,;:.<>`) characters.
+  - **Correct Horse Battery Staple** — passphrase mode. Selecting it switches the length to a word count, locks the other options, and builds passphrases from random dictionary words.
+- **Text tab**
+  - **IDs** — UUID (v4), ULID (sortable, Crockford base32), MAC (random 6-byte).
+  - **Encodings** — Base64URL, raw bytes (space-separated decimals), and hex, each `N` units long from the length slider.
+  - Output slides in; click it to copy.
+- **Copy feedback** — every copyable element flashes the same ping; a "new random password copied to clipboard" notice appears beneath the card on **Copy**.
 
-This password generator allows you to customize the following options:
+## Passphrase wordlist
 
-- **Password Length**: Set the password length (minimum 4, maximum 64).
-- **Include Uppercase Letters**: Toggle inclusion of uppercase letters (A-Z).
-- **Include Numbers**: Toggle inclusion of numbers (0-9).
-- **Include Special Characters**: Add special characters such as `!@#$%^&*()`.
-- **Exclude Similar Characters**: Avoid characters that are easily confused, such as `I`, `l`, `1`, `O`, `0`.
-- **Exclude Vowels**: Option to exclude vowels to prevent the formation of words.
-- **Exclude Ambiguous Characters**: Avoid ambiguous symbols like `{ } [ ] ( ) / \ ' " ~ , ; : . < >`.
+Passphrase mode reads `words.txt`, fetched from the same origin on page load. The bundled list is **14,129 unique words** (3–9 letters), merged and deduplicated from three sources:
 
-The generated password will be displayed in the output area and can be copied to the clipboard with a single click.
+| Source | Purpose |
+|--------|---------|
+| [google-10000-english](https://github.com/first20hours/google-10000-english) (no-swears) | Common, memorable words |
+| [EFF Large Wordlist](https://www.eff.org/dice) | Curated for passphrases (distinct prefixes, edit distance ≥ 3) |
+| [BIP-39 English](https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md) | Clean crypto seed-phrase list |
 
-## Preview
+That is ≈13.8 bits per word, so a 4-word passphrase carries ≈55 bits of entropy. Adding a word beats expanding the list: each extra word adds ~13.8 bits, while doubling the list adds only 1 bit per word.
 
-![Password Generator Preview](preview.png)
+To regenerate or extend `words.txt`, merge the sources, filter to `^[a-z]{3,9}$`, then `sort -u`.
 
-## Installation Instructions
+## Running locally
 
-### Option 1: Run Locally in Browser
+The character password generator and all text tools work by simply opening `index.html` in any modern browser — no server required.
 
-1. Clone the repository or download the `passgen.html` file.
-2. Open `passgen.html` in any modern web browser.
-3. The password generator will be fully functional locally, with no need for a web server.
+**Passphrase mode is the exception:** it fetches `words.txt`, and browsers block `fetch` over `file://`. To use it locally, serve the directory over HTTP:
 
-### Option 2: Host on Your Web Server
+```bash
+python3 -m http.server 8799
+# then open http://localhost:8799/
+```
 
-1. Place the `passgen.html` file in the public directory of your web server. For example:
-   - If using **Apache** or **Nginx**, place the `passgen.html` file in `/var/www/html/`.
-   - For **cPanel** or shared hosting, upload `passgen.html` to the `public_html` directory.
-   
-2. Access the file through your browser by navigating to your server’s URL (e.g., `http://yourdomain.com/passgen.html`).
+## Deployment
 
-Once uploaded, users can open the page to generate passwords directly in their browser.
+The site is packaged as a static Nginx image (`nginx:1.27-alpine`) serving `index.html` and `words.txt` — see `Dockerfile`.
 
-## Customization
-
-Feel free to customize the password generator to suit your needs. Since it's all contained in a single HTML file, you can modify the styles, settings, and password generation logic by editing the `passgen.html` file. 
-
-For example, to change the default password length or to adjust which characters are included, simply modify the JavaScript code embedded in the file.
+```bash
+docker build -t random .
+docker run -p 8080:80 random
+# then open http://localhost:8080/
+```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE).
