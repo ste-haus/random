@@ -462,7 +462,14 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding: 0;
+            /* Horizontal room so the copy ring isn't clipped left/right */
+            padding: 0 14px;
+        }
+
+        /* Vertical room only once open, so the collapsed state still slides shut cleanly */
+        .option-list.show {
+            padding-top: 14px;
+            padding-bottom: 14px;
         }
 
         .password-option {
