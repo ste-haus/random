@@ -354,8 +354,24 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .drawer[open] > summary::after {
+        .drawer.is-open > summary::after {
             transform: rotate(90deg);
+        }
+
+        .drawer-content {
+            height: 0;
+            overflow: hidden;
+            transition: height .25s ease;
+        }
+
+        .drawer[open] > .drawer-content {
+            height: auto;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .drawer-content {
+                transition: none;
+            }
         }
 
         .checkbox-label {
@@ -726,68 +742,70 @@
                 <details class="drawer">
                     <summary>Options</summary>
 
-                    <label class="checkbox-label" for="passphrase">
-                        <input type="checkbox" id="passphrase" onchange="togglePassphrase()">
-                        <span>Correct Horse Battery Staple</span>
-                        <span class="info-wrap">
-                            <span class="info-button">i</span>
-                            <span class="tooltip">Passphrase of random words; length sets the word count</span>
-                        </span>
-                    </label>
+                    <div class="drawer-content">
+                        <label class="checkbox-label" for="passphrase">
+                            <input type="checkbox" id="passphrase" onchange="togglePassphrase()">
+                            <span>Correct Horse Battery Staple</span>
+                            <span class="info-wrap">
+                                <span class="info-button">i</span>
+                                <span class="tooltip">Passphrase of random words; length sets the word count</span>
+                            </span>
+                        </label>
 
-                    <label class="checkbox-label" for="include-upper">
-                        <input type="checkbox" id="include-upper" checked>
-                        <span>Include Uppercase Letters</span>
-                        <span class="info-wrap">
-                            <span class="info-button">i</span>
-                            <span class="tooltip">A-Z</span>
-                        </span>
-                    </label>
+                        <label class="checkbox-label" for="include-upper">
+                            <input type="checkbox" id="include-upper" checked>
+                            <span>Include Uppercase Letters</span>
+                            <span class="info-wrap">
+                                <span class="info-button">i</span>
+                                <span class="tooltip">A-Z</span>
+                            </span>
+                        </label>
 
-                    <label class="checkbox-label" for="include-numbers">
-                        <input type="checkbox" id="include-numbers" checked>
-                        <span>Include Numbers</span>
-                        <span class="info-wrap">
-                            <span class="info-button">i</span>
-                            <span class="tooltip">0-9</span>
-                        </span>
-                    </label>
+                        <label class="checkbox-label" for="include-numbers">
+                            <input type="checkbox" id="include-numbers" checked>
+                            <span>Include Numbers</span>
+                            <span class="info-wrap">
+                                <span class="info-button">i</span>
+                                <span class="tooltip">0-9</span>
+                            </span>
+                        </label>
 
-                    <label class="checkbox-label" for="include-specials">
-                        <input type="checkbox" id="include-specials">
-                        <span>Include Special Characters</span>
-                        <span class="info-wrap">
-                            <span class="info-button">i</span>
-                            <span class="tooltip">!@#$%^&amp;*()_+~`|}{[]:;?&gt;&lt;,./-=</span>
-                        </span>
-                    </label>
+                        <label class="checkbox-label" for="include-specials">
+                            <input type="checkbox" id="include-specials">
+                            <span>Include Special Characters</span>
+                            <span class="info-wrap">
+                                <span class="info-button">i</span>
+                                <span class="tooltip">!@#$%^&amp;*()_+~`|}{[]:;?&gt;&lt;,./-=</span>
+                            </span>
+                        </label>
 
-                    <label class="checkbox-label" for="exclude-similar">
-                        <input type="checkbox" id="exclude-similar">
-                        <span>Exclude Similar Characters</span>
-                        <span class="info-wrap">
-                            <span class="info-button">i</span>
-                            <span class="tooltip">I, l, 1, O, 0</span>
-                        </span>
-                    </label>
+                        <label class="checkbox-label" for="exclude-similar">
+                            <input type="checkbox" id="exclude-similar">
+                            <span>Exclude Similar Characters</span>
+                            <span class="info-wrap">
+                                <span class="info-button">i</span>
+                                <span class="tooltip">I, l, 1, O, 0</span>
+                            </span>
+                        </label>
 
-                    <label class="checkbox-label" for="exclude-vowels">
-                        <input type="checkbox" id="exclude-vowels">
-                        <span>Exclude Vowels</span>
-                        <span class="info-wrap">
-                            <span class="info-button">i</span>
-                            <span class="tooltip">a, e, i, o, u</span>
-                        </span>
-                    </label>
+                        <label class="checkbox-label" for="exclude-vowels">
+                            <input type="checkbox" id="exclude-vowels">
+                            <span>Exclude Vowels</span>
+                            <span class="info-wrap">
+                                <span class="info-button">i</span>
+                                <span class="tooltip">a, e, i, o, u</span>
+                            </span>
+                        </label>
 
-                    <label class="checkbox-label" for="exclude-ambiguous">
-                        <input type="checkbox" id="exclude-ambiguous">
-                        <span>Avoid Ambiguous Characters</span>
-                        <span class="info-wrap">
-                            <span class="info-button">i</span>
-                            <span class="tooltip">{ } [ ] ( ) / \ ' &quot; ~ , ; : . &lt; &gt;</span>
-                        </span>
-                    </label>
+                        <label class="checkbox-label" for="exclude-ambiguous">
+                            <input type="checkbox" id="exclude-ambiguous">
+                            <span>Avoid Ambiguous Characters</span>
+                            <span class="info-wrap">
+                                <span class="info-button">i</span>
+                                <span class="tooltip">{ } [ ] ( ) / \ ' &quot; ~ , ; : . &lt; &gt;</span>
+                            </span>
+                        </label>
+                    </div>
                 </details>
             </form>
 
@@ -1521,10 +1539,76 @@
             return x.map(rhex).join('');
         }
 
+        // Options drawer: <details> gives no animatable box, so the slide runs on the
+        // wrapper's height and the open attribute is held back until the slide lands.
+        const DRAWER_OPEN_CLASS = 'is-open';
+        const DRAWER_COLLAPSED_HEIGHT = '0px';
+        const DRAWER_SLIDE_PROPERTY = 'height';
+        const DRAWER_AUTO_HEIGHT = '';
+        const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+        const drawerSlides = new WeakMap();
+
+        // Flush pending style changes so the next assignment starts a transition
+        // instead of being coalesced into a single layout pass.
+        function forceReflow(element) {
+            void element.offsetHeight;
+        }
+
+        function slideDrawer(drawer, content, open) {
+            const pendingSlide = drawerSlides.get(content);
+            if (pendingSlide) {
+                content.removeEventListener('transitionend', pendingSlide);
+                drawerSlides.delete(content);
+            }
+
+            drawer.classList.toggle(DRAWER_OPEN_CLASS, open);
+
+            if (window.matchMedia(REDUCED_MOTION_QUERY).matches) {
+                content.style.height = DRAWER_AUTO_HEIGHT;
+                drawer.open = open;
+                return;
+            }
+
+            // Measured before the open attribute flips, or the wrapper is already full height.
+            const startHeight = `${content.getBoundingClientRect().height}px`;
+            if (open) drawer.open = true;
+
+            content.style.height = startHeight;
+            forceReflow(content);
+            content.style.height = open ? `${content.scrollHeight}px` : DRAWER_COLLAPSED_HEIGHT;
+
+            const onSlideEnd = event => {
+                if (event.target !== content || event.propertyName !== DRAWER_SLIDE_PROPERTY) return;
+
+                content.removeEventListener('transitionend', onSlideEnd);
+                drawerSlides.delete(content);
+                if (!open) drawer.open = false;
+                content.style.height = DRAWER_AUTO_HEIGHT;
+            };
+
+            content.addEventListener('transitionend', onSlideEnd);
+            drawerSlides.set(content, onSlideEnd);
+        }
+
+        function bindDrawers() {
+            document.querySelectorAll('.drawer').forEach(drawer => {
+                const summary = drawer.querySelector('summary');
+                const content = drawer.querySelector('.drawer-content');
+
+                drawer.classList.toggle(DRAWER_OPEN_CLASS, drawer.open);
+
+                summary.addEventListener('click', event => {
+                    event.preventDefault();
+                    slideDrawer(drawer, content, !drawer.open);
+                });
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             bindLengthControl('password-length-slider', 'length');
             bindLengthControl('text-length-slider', 'text-length');
             bindLengthControl('lorem-length-slider', 'lorem-length');
+            bindDrawers();
             loadWordlist();
             loadLorem();
         });
