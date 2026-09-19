@@ -63,6 +63,10 @@ python3 -m http.server 8799
 # then open http://localhost:8799/
 ```
 
+## Origins
+
+Originally forked from [lswiese/selfhostedpassgen](https://github.com/lswiese/selfhostedpassgen).
+
 ## License
 
 MIT; see [LICENSE](LICENSE).
